@@ -1,7 +1,8 @@
-/* static/css/style.css */
 body {
-    background-color: #F7B9D7;
-    font-family: 'Arial', sans-serif;
+    background-color: #FFE5E6;
+    font-family: 'Varela Round', 'Arial', sans-serif;
+    font-weight: bold;
+    color: #FF9C9C;
     height: 100vh;
     margin: 0;
     padding: 20px;
@@ -25,7 +26,7 @@ body {
 .strip-container {
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: repeat(6, 1fr);
+    grid-template-rows: repeat(3, 1fr);
     gap: 10px;
     border: 5px solid #000;
     padding: 10px;
@@ -42,8 +43,8 @@ body {
 }
 
 .photo-frame.selected {
-    border: 2px solid #0d6efd;
-    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.25);
+    border: 2px solid #FFE5E6;
+    box-shadow: 0 0 0 4px #FF9C9C;
 }
 
 .photo-frame.has-photo {
@@ -73,28 +74,8 @@ body {
 }
 
 .handwritten {
-    font-family: 'Caveat', cursive;
+    font-family: 'Italianno';
     font-size: 1.2rem;
-}
-
-.sticker-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-.sticker {
-    width: 50px;
-    height: 50px;
-    cursor: pointer;
-    transition: transform 0.2s;
-    border: 2px solid transparent;
-}
-
-.sticker:hover {
-    transform: scale(1.1);
-    border-color: #0d6efd;
 }
 
 .note {
@@ -107,9 +88,11 @@ body {
     cursor: move;
 }
 
-.sticker-item {
-    position: absolute;
-    cursor: move;
+input[type="color"] {
+    border: none;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
 }
 
 @media (max-width: 768px) {

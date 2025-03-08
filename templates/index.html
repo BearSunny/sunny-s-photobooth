@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sunny's Photobooth</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Caveat&family=Indie+Flower&family=Kalam&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Italianno&family=Varela+Round&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="static/styles.css">
 </head>
 <body>
@@ -18,9 +18,6 @@
                             <div class="photo-frame" id="frame1" data-frame-id="1"></div>
                             <div class="photo-frame" id="frame2" data-frame-id="2"></div>
                             <div class="photo-frame" id="frame3" data-frame-id="3"></div>
-                            <div class="photo-frame" id="frame4" data-frame-id="4"></div>
-                            <div class="photo-frame" id="frame5" data-frame-id="5"></div>
-                            <div class="photo-frame" id="frame6" data-frame-id="6"></div>
                         </div>
                     </div>
                     
@@ -32,12 +29,18 @@
                     <div class="controls mt-3">
                         <div class="row">
                             <div class="col-12 text-center mb-3">
-                                <button id="captureBtn" class="btn btn-primary">Take Photo</button>
-                                <button id="startOverBtn" class="btn btn-outline-secondary ms-2" style="display: none;">Start Over</button>
-                                <button id="downloadBtn" class="btn btn-success ms-2" style="display: none;">Download Strip</button>
+                                <button id="startBtn" class="btn btn-primary" style="background-color: #FFE5E6; border-color: #FFE5E6; color: #FF9C9C;">Start Camera</button>
+                                <button id="captureBtn" class="btn btn-primary" style="background-color: #FFE5E6; border-color: #FFE5E6; color: #FF9C9C;">Take Photo</button>
+                                <button id="retakeBtn" class="btn btn-primary" style="background-color: #FFE5E6; border-color: #FFE5E6; color: #FF9C9C;">Retake</button>
                             </div>
                         </div>
                         
+                        <div class="preview-container text-center mt-3" id="previewContainer" style="display: none;">
+                            <h5>Preview</h5>
+                            <img id="preview" src="" alt="Preview" class="img-fluid rounded">
+                            <div id="saveMessage" class="alert mt-2" style="display: none;"></div>
+                        </div>
+
                         <div class="toolbox p-3 mt-3">
                             <h5>Customize Your Photos</h5>
                             <div class="row">
@@ -45,12 +48,13 @@
                                     <label for="stripColorPicker" class="form-label">Strip Color:</label>
                                     <input type="color" id="stripColorPicker" class="form-control form-control-color" value="#000000">
                                 </div>
+
                                 <div class="col-md-6 mb-3">
-                                    <label for="fontSelector" class="form-label">Note Font:</label>
-                                    <select id="fontSelector" class="form-select">
-                                        <option value="'Caveat', cursive">Caveat</option>
-                                        <option value="'Indie Flower', cursive">Indie Flower</option>
-                                        <option value="'Kalam', cursive">Kalam</option>
+                                    <label for="frameSelect" class="form-label">Current Frame:</label>
+                                    <select id="frameSelect" class="form-label">
+                                        <option value="1">Frame 1</option>
+                                        <option value="2">Frame 2</option>
+                                        <option value="3">Frame 3</option>
                                     </select>
                                 </div>
                             </div>
@@ -61,21 +65,11 @@
                                         <label for="noteText" class="form-label">Add Note:</label>
                                         <textarea id="noteText" class="form-control handwritten" placeholder="Write your note here..."></textarea>
                                     </div>
-                                    <button id="addNoteBtn" class="btn btn-outline-primary mb-3">Add Note to Selected Frame</button>
                                 </div>
                             </div>
-                            
                             <div class="row">
-                                <div class="col-12">
-                                    <label class="form-label">Add Stickers:</label>
-                                    <div class="sticker-container">
-                                        <img src="{{ url_for('static', filename='images/stickers/heart.png') }}" class="sticker" data-sticker="heart">
-                                        <img src="{{ url_for('static', filename='images/stickers/star.png') }}" class="sticker" data-sticker="star">
-                                        <img src="{{ url_for('static', filename='images/stickers/smile.png') }}" class="sticker" data-sticker="smile">
-                                        <img src="{{ url_for('static', filename='images/stickers/crown.png') }}" class="sticker" data-sticker="crown">
-                                        <img src="{{ url_for('static', filename='images/stickers/balloon.png') }}" class="sticker" data-sticker="balloon">
-                                        <img src="{{ url_for('static', filename='images/stickers/cake.png') }}" class="sticker" data-sticker="cake">
-                                    </div>
+                                <div class="col-12 text-center">
+                                    <button id="saveStripBtn" class="btn btn-primary" style="background-color: #FFE5E6; border-color: #FFE5E6; color: #FF9C9C;">Save Photo Strip</button>
                                 </div>
                             </div>
                         </div>
@@ -85,8 +79,149 @@
         </div>
     </div>
     
+    <style>
+        #captureBtn:hover, #startBtn:hover, #retakeBtn:hover, #saveStripBtn:hover {
+            transform: scale(1.05); 
+            box-shadow: 0 0 8px rgba(255, 229, 230, 0.7); 
+            background-color: #FFD0D2;
+            border-color: #FFD0D2;
+        }
+        .preview-container {
+            margin-top: 20px;
+        }
+        #preview {
+            max-width: 100%;
+            border-radius: 8px;
+            border: 2px solid #FFE5E6;
+        }      
+    </style>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fabric@5.2.1/dist/fabric.min.js"></script>
-    <script src="{{ url_for('static', filename='js/photobooth.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cameraVideo = document.getElementById('camera');
+            const photoCanvas = document.getElementById('photoCanvas');
+            const startBtn = document.getElementById('startBtn');
+            const captureBtn = document.getElementById('captureBtn');
+            const retakeBtn = document.getElementById('retakeBtn');
+            const preview = document.getElementById('preview');
+            const previewContainer = document.getElementById('previewContainer');
+            const saveMessage = document.getElementById('saveMessage');
+            const frameSelect = document.getElementById('frameSelect');
+            const stripColorPicker = document.getElementById('stripColorPicker');
+            const noteText = document.getElementById('noteText');
+            const saveStripBtn = document.getElementById('saveStripBtn');
+
+            let stream = null;
+            let currentFrameId = 1;
+
+            // Initialize photo strip
+            const photoFrames = document.querySelectorAll('.photo-frame');
+            const photoStrip = document.getElementById('photoStrip');
+
+            // Update strip's color
+            stripColorPicker.addEventListener('input', function() {
+                photoStrip.style.borderColor = this.value;
+                photoStrip.style.backgroundColor = this.value;
+            });
+
+            // Change current frame
+            frameSelect.addEventListener('change', function() {
+                currentFrameId = parseInt(this.value);
+            });
+
+            // Start camera
+            startBtn.addEventListener('click', async () => {
+                try {
+                    stream = await navigator .mediaDevices.getUserMedia({
+                        video : true,
+                        audio : false
+                    });
+                    cameraVideo.srcObject = stream;
+                    startBtn.disabled = true;
+                    captureBtn.disabled = false;
+                } catch(error) {
+                    console.error('Error accessing camera:', error);
+                    alert('Error accessing camera. Please make sure that you have granted permission.');
+                }
+            });
+
+            // Capture photo
+            captureBtn.addEventListener('click', () => {
+                // Set canvas dimensions to match the camera
+                photoCanvas.width = cameraVideo.videoWidth;
+                photoCanvas.height = cameraVideo.videoHeight;
+
+                // Draw video frames to canvas
+                const context = photoCanvas.getContext('2d');
+                context.drawImage(cameraVideo, cameraVideo.videoWidth * 0.25, cameraVideo.videoHeight * 0.2, cameraVideo.videoWidth * 0.5, 
+                cameraVideo.videoHeight * 0.6, 0, 0, photoCanvas.width, photoCanvas.height);
+
+                // Get current frame
+                const frameElement = document.getElementById(`frame${currentFrameId}`);
+
+                // Display preview
+                preview.src = photoCanvas.toDataURL('image/png');
+                previewContainer.style.display = 'block';
+
+                // Add to current frame
+                frameElement.style.backgroundImage = `url(${photoCanvas.toDataURL('image/png')})`; 
+                frameElement.style.backgroundSize = 'cover';
+
+                retakeBtn.disabled = false;
+
+                // Move to next frame if available
+                if (currentFrameId < 3) {
+                    currentFrameId++;
+                    frameSelect.value = currentFrameId;
+                }
+            });
+
+            // Retake photo
+            retakeBtn.addEventListener('click', () => {
+                previewContainer.style.display = 'none';
+                saveMessage.style.display = 'none';
+
+                // Clear current frame
+                const frameElement = document.getElementById(`frame${currentFrameId}`);
+                frameElement.style.backgroundImage = '';
+            });
+
+            // Save photo strip
+            document.getElementById('saveStripBtn').addEventListener('click', async () => {
+                const photos = getCapturedImages(); // Function to collect base64 images from your app
+
+                if (photos.length === 0) {
+                    alert("No photos available!");
+                    return;
+                }
+
+                const response = await fetch('/save-strip', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ photos })
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob(); // Convert response to file
+                    const url = window.URL.createObjectURL(blob);
+                    
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = "photo_strip.png"; // Name of the downloaded file
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+
+                    window.URL.revokeObjectURL(url); // Cleanup URL object
+                } else {
+                    alert("Failed to download strip!");
+                }
+            });
+        });
+    </script>
 </body>
 </html>
